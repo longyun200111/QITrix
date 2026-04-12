@@ -31,3 +31,7 @@ From the repository root:
 ```bash
 pip install .
 ```
+
+## Documentation
+
+- [API reference](docs/api.md)
