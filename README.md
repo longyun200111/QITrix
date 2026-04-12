@@ -26,10 +26,37 @@ rho_pt = ptrans(rho, [2, 3], [1])
 
 ## Install
 
-From the repository root:
+From GitHub with `pip`:
 
 ```bash
-pip install .
+python -m pip install "git+https://github.com/longyun200111/qupy.git"
+```
+
+From GitHub with `uv`:
+
+```bash
+uv add git+https://github.com/longyun200111/qupy.git
+```
+
+To install into the current `uv` environment without adding a project dependency:
+
+```bash
+uv pip install git+https://github.com/longyun200111/qupy.git
+```
+
+To pin a branch or tag:
+
+```bash
+python -m pip install "git+https://github.com/longyun200111/qupy.git@main"
+uv add git+https://github.com/longyun200111/qupy.git --tag v0.1.0
+```
+
+For local development:
+
+```bash
+git clone https://github.com/longyun200111/qupy.git
+cd qupy
+python -m pip install -e .
 ```
 
 ## Documentation
