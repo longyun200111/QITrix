@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, overload
 
 import cvxpy as cp
 import numpy as np
@@ -7,10 +7,13 @@ import scipy.sparse as sp
 from .extend import extend
 from .state import fock
 from .tensor import tensor
-from .utils import _normalize_axes, _as_csr_array
+from .utils import _normalize_axes, _as_csr_array, _as_sparse_array
+from ._types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
 
 
-def _ptrace_numpy(rho: np.ndarray, dims: list[int], axes: list[int]) -> np.ndarray:
+def _ptrace_numpy(
+    rho: NDArray[Any], dims: list[int], axes: int | list[int]
+) -> NDArray[Any]:
     """
     Compute the partial trace of a dense matrix with NumPy tensor reshaping.
 
@@ -21,9 +24,9 @@ def _ptrace_numpy(rho: np.ndarray, dims: list[int], axes: list[int]) -> np.ndarr
         dimensions are given by ``dims``.
     dims : list[int]
         Dimensions of the subsystems in the same order as the tensor factors.
-    axes : list[int]
-        Subsystem indices to trace out. The indices are assumed to be already
-        normalized to the range ``0, ..., len(dims) - 1``.
+    axes : int | list[int]
+        Subsystem indices to trace out. Negative indices are allowed and are
+        normalized in the usual Python way.
 
     Returns
     -------
@@ -36,10 +39,11 @@ def _ptrace_numpy(rho: np.ndarray, dims: list[int], axes: list[int]) -> np.ndarr
     ``dims + dims`` and then repeatedly applies ``np.trace`` to the bra/ket
     index pair associated with each traced subsystem.
     """
+    normalized_axes = _normalize_axes(axes, len(dims))
     tensor = np.asarray(rho).reshape(dims + dims)
     current_dims = dims.copy()
 
-    for axis in sorted(axes, reverse=True):
+    for axis in sorted(normalized_axes, reverse=True):
         tensor = np.trace(tensor, axis1=axis, axis2=axis + len(current_dims))
         del current_dims[axis]
 
@@ -47,7 +51,7 @@ def _ptrace_numpy(rho: np.ndarray, dims: list[int], axes: list[int]) -> np.ndarr
     return tensor.reshape((out_dim, out_dim))
 
 
-def _partial_trace_superop(dims: list[int], axes: list[int]) -> sp.csr_array:
+def _partial_trace_superop(dims: list[int], axes: int | list[int]) -> sp.csr_array:
     """
     Construct the sparse superoperator representing a partial trace map.
 
@@ -55,8 +59,9 @@ def _partial_trace_superop(dims: list[int], axes: list[int]) -> sp.csr_array:
     ----------
     dims : list[int]
         Dimensions of the input subsystems.
-    axes : list[int]
-        Subsystem indices to trace out.
+    axes : int | list[int]
+        Subsystem indices to trace out. Negative indices are allowed and are
+        normalized in the usual Python way.
 
     Returns
     -------
@@ -71,21 +76,22 @@ def _partial_trace_superop(dims: list[int], axes: list[int]) -> sp.csr_array:
     vectorized maximally entangled effect to the full doubled Hilbert space.
     It is used by the CVXPY branch, where the linear map form is convenient.
     """
-    trace_dim = int(np.prod([dims[axis] for axis in axes], dtype=int))
-    remaining_dims = [dim for i, dim in enumerate(dims) if i not in axes]
+    normalized_axes = _normalize_axes(axes, len(dims))
+    trace_dim = int(np.prod([dims[axis] for axis in normalized_axes], dtype=int))
+    remaining_dims = [dim for i, dim in enumerate(dims) if i not in normalized_axes]
 
     maximal_ent = sp.eye_array(trace_dim).reshape((1, -1)).tocsr()
     superop = extend(
         maximal_ent,
         input_dims=dims + dims,
         output_dims=remaining_dims + remaining_dims,
-        input_axes=axes + [axis + len(dims) for axis in axes],
+        input_axes=normalized_axes + [axis + len(dims) for axis in normalized_axes],
         output_axes=[],
     )
     return _as_csr_array(superop)
 
 
-def _ptrace_cvxpy(rho: cp.Expression, dims: list[int], axes: list[int]) -> cp.Expression:
+def _ptrace_cvxpy(rho: Expression, dims: list[int], axes: int | list[int]) -> Expression:
     """
     Compute the partial trace of a CVXPY matrix expression.
 
@@ -95,8 +101,9 @@ def _ptrace_cvxpy(rho: cp.Expression, dims: list[int], axes: list[int]) -> cp.Ex
         Matrix-valued CVXPY expression.
     dims : list[int]
         Dimensions of the tensor-product subsystems.
-    axes : list[int]
-        Subsystem indices to trace out.
+    axes : int | list[int]
+        Subsystem indices to trace out. Negative indices are allowed and are
+        normalized in the usual Python way.
 
     Returns
     -------
@@ -108,11 +115,12 @@ def _ptrace_cvxpy(rho: cp.Expression, dims: list[int], axes: list[int]) -> cp.Ex
     The implementation uses the sparse superoperator returned by
     ``_partial_trace_superop`` and applies it to ``cp.vec(rho, order="F")``.
     """
-    if not axes:
+    normalized_axes = _normalize_axes(axes, len(dims))
+    if not normalized_axes:
         return rho
 
-    superop = _partial_trace_superop(dims, axes)
-    out_dims = [dim for i, dim in enumerate(dims) if i not in axes]
+    superop = _partial_trace_superop(dims, normalized_axes)
+    out_dims = [dim for i, dim in enumerate(dims) if i not in normalized_axes]
     out_dim = int(np.prod(out_dims, dtype=int)) if out_dims else 1
 
     return cp.reshape(
@@ -121,20 +129,20 @@ def _ptrace_cvxpy(rho: cp.Expression, dims: list[int], axes: list[int]) -> cp.Ex
         order="F",
     )
 
-
-def _ptrace_sum(rho: Any, dims: list[int], axes: list[int]):
+def _ptrace_sum(rho: OperatorLike, dims: list[int], axes: int | list[int]) -> OperatorLike:
     r"""
     Compute the partial trace of a sparse operator by the defining summation.
 
     Parameters
     ----------
-    rho : Any
+    rho : OperatorLike
         Matrix-like input operator. The function first converts it to
         ``scipy.sparse.csr_array`` and then evaluates the defining summation.
     dims : list[int]
         Dimensions of the tensor-product subsystems.
-    axes : list[int]
-        Subsystem indices to trace out.
+    axes : int | list[int]
+        Subsystem indices to trace out. Negative indices are allowed and are
+        normalized in the usual Python way.
 
     Returns
     -------
@@ -156,13 +164,14 @@ def _ptrace_sum(rho: Any, dims: list[int], axes: list[int]):
 
     where the sum runs over the basis indices of the traced subsystems.
     """
-    if not axes:
+    normalized_axes = _normalize_axes(axes, len(dims))
+    if not normalized_axes:
         return _as_csr_array(rho)
 
     traced_rho = _as_csr_array(rho)
     current_dims = dims.copy()
 
-    for axis in sorted(axes, reverse=True):
+    for axis in sorted(normalized_axes, reverse=True):
         left_dim = int(np.prod(current_dims[:axis], dtype=int)) if axis > 0 else 1
         right_dim = (
             int(np.prod(current_dims[axis + 1 :], dtype=int))
@@ -189,13 +198,35 @@ def _ptrace_sum(rho: Any, dims: list[int], axes: list[int]):
     return traced_rho
 
 
-def ptrace(rho, dims, axes):
+@overload
+def ptrace(
+    rho: Expression, dims: int | list[int] | np.ndarray, axes: int | list[int]
+) -> Expression: ...
+
+
+@overload
+def ptrace(
+    rho: NDArray[Any], dims: int | list[int] | np.ndarray, axes: int | list[int]
+) -> NDArray[Any]: ...
+
+
+@overload
+def ptrace(
+    rho: SparseLike, dims: int | list[int] | np.ndarray, axes: int | list[int]
+) -> SparseArray: ...
+
+
+def ptrace(
+    rho: NDArray[Any] | SparseLike | Expression,
+    dims: int | list[int] | np.ndarray,
+    axes: int | list[int],
+) -> NDArray[Any] | SparseArray | Expression:
     """
     Compute the partial trace of an operator over selected subsystems.
 
     Parameters
     ----------
-    rho : np.ndarray | sp.sparray | cp.Expression
+    rho : np.ndarray | scipy.sparse.spmatrix | sp.sparray | cvxpy.Expression
         Input operator. Dense NumPy arrays and CVXPY matrix expressions have
         dedicated implementations. Any other supported matrix-like input is
         handled by the fallback summation-based branch.
@@ -222,10 +253,9 @@ def ptrace(rho, dims, axes):
       sparse matrix multiplications.
     """
     dims = np.reshape(dims, (-1,)).tolist()
-    normalized_axes = _normalize_axes(axes, len(dims))
-
     if isinstance(rho, cp.Expression):
-        return _ptrace_cvxpy(rho, dims, normalized_axes)
+        return _ptrace_cvxpy(rho, dims, axes)
     if isinstance(rho, np.ndarray):
-        return _ptrace_numpy(rho, dims, normalized_axes)
-    return _ptrace_sum(rho, dims, normalized_axes)
+        return _ptrace_numpy(rho, dims, axes)
+    rho = _as_sparse_array(rho)
+    return _ptrace_sum(rho, dims, axes)

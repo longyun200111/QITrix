@@ -1,19 +1,23 @@
-import cvxpy as cp
+from typing import Any, Literal, overload
+
 import numpy as np
 import scipy.sparse as sp
 
+from ._types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
+from .utils import _as_sparse_array
+
 def _permute_numpy(
-        rho: np.ndarray, 
-        dims: list[int], 
-        perm: list[int], 
-        direction: str = "both"
-    ) -> np.ndarray:
+    rho: NDArray[Any],
+    dims: list[int],
+    perm: list[int],
+    direction: Literal["both", "left", "right"] = "both",
+) -> NDArray[Any]:
     """
     Permute the axes of a density matrix using NumPy.
 
     Parameters
     ----------
-    rho : np.ndarray
+    rho : NDArray[Any]
         Input operator written on the tensor-product space whose subsystem
         dimensions are given by ``dims``.
     dims : list[int]
@@ -21,19 +25,19 @@ def _permute_numpy(
     perm : list[int]
         Permutation of subsystem indices. The indices are assumed to be already
         normalized to the range ``0, ..., len(dims) - 1``.
-    direction : str, optional
+    direction : Literal["both", "left", "right"], optional
         Direction of permutation. Must be one of "both", "left", or "right".
         Default is "both".
 
     Returns
     -------
-    np.ndarray
+    NDArray[Any]
         The permuted operator.
 
     Notes
     -----
-    The function constructs the permutation matrix corresponding to the given
-    permutation and applies it to the input operator from the left, right, or both sides.
+    The function reshapes ``rho`` into a tensor and applies ``np.transpose``
+    to the subsystem indices selected by ``direction``.
     """
     dim = int(np.prod(dims, dtype=int)) if dims else 1
     if direction == "both":
@@ -52,11 +56,11 @@ def _permute_numpy(
         permuted_tensor_rho = np.transpose(tensor_rho, axes=tensor_perm)
         perm_rho = permuted_tensor_rho.reshape((-1, dim))
     else:
-        raise ValueError("Invalid direction. Must be 'both', 'left', or 'right'.")
+        raise ValueError("Invalid direction. Must be \"both\", \"left\", or \"right\".")
 
     return perm_rho
 
-def _get_permutation_matrix(dims, perm):
+def _get_permutation_matrix(dims: list[int], perm: list[int]) -> sp.csr_array:
     """
     Construct the subsystem permutation matrix associated with ``perm``.
 
@@ -76,32 +80,66 @@ def _get_permutation_matrix(dims, perm):
     coords = np.arange(d)
     ravel_coords = np.reshape(coords, dims)
     perm_coords = np.transpose(ravel_coords, perm).flatten()
-    perm_matrix = sp.coo_array(([1.]*d, (coords, perm_coords)), shape=(d, d)).tocsr()
+    perm_matrix = sp.coo_array(([1.0] * d, (coords, perm_coords)), shape=(d, d)).tocsr()
     return perm_matrix
 
-def permute(rho, dims, perm, direction: str = "both"):
+@overload
+def permute(
+    rho: Expression,
+    dims: list[int],
+    perm: list[int],
+    direction: Literal["both", "left", "right"] = "both",
+) -> Expression: ...
+
+
+@overload
+def permute(
+    rho: SparseLike,
+    dims: list[int],
+    perm: list[int],
+    direction: Literal["both", "left", "right"] = "both",
+) -> SparseArray: ...
+
+
+@overload
+def permute(
+    rho: NDArray[Any],
+    dims: list[int],
+    perm: list[int],
+    direction: Literal["both", "left", "right"] = "both",
+) -> NDArray[Any]: ...
+
+
+def permute(
+    rho: OperatorLike,
+    dims: list[int],
+    perm: list[int],
+    direction: Literal["both", "left", "right"] = "both",
+) -> OperatorLike:
     """
     Permute subsystem order in an operator or rectangular matrix.
 
     Parameters
     ----------
-    rho : np.ndarray | sp.sparray | cp.Expression
+    rho : np.ndarray | scipy.sparse.spmatrix | sp.sparray | cvxpy.Expression
         Matrix-like input object.
     dims : list[int]
         Dimensions of the subsystems being permuted.
     perm : list[int]
         Target subsystem ordering.
-    direction : str, optional
+    direction : Literal["both", "left", "right"], optional
         Which side of the matrix should be permuted. Supported values are
         ``"both"``, ``"left"``, and ``"right"``.
 
     Returns
     -------
-    np.ndarray | sp.sparray | cp.Expression
+    np.ndarray | sp.sparray | cvxpy.Expression
         Permuted matrix in the same backend family as ``rho``.
     """
     if isinstance(rho, np.ndarray):
         return _permute_numpy(rho, dims, perm, direction)
+    if isinstance(rho, SparseLike):
+        rho = _as_sparse_array(rho)
 
     perm_matrix = _get_permutation_matrix(dims, perm)
 
@@ -112,6 +150,6 @@ def permute(rho, dims, perm, direction: str = "both"):
     elif direction == "right":
         perm_rho = rho @ perm_matrix.T
     else:
-        raise ValueError("Invalid direction. Must be 'both', 'left', or 'right'.")
-    
+        raise ValueError("Invalid direction. Must be \"both\", \"left\", or \"right\".")
+
     return perm_rho

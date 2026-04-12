@@ -1,9 +1,36 @@
+from typing import Any, overload
+
 import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
+from ._types import (
+    DenseArrayT,
+    Expression,
+    NDArray,
+    NonCvxOperatorLike,
+    OperatorLike,
+    SparseArray,
+    SparseLike,
+)
+from .utils import _as_sparse_array
 
-def _kron(left, right):
+@overload
+def _kron(left: Expression, right: OperatorLike) -> Expression: ...
+
+@overload
+def _kron(left: OperatorLike, right: Expression) -> Expression: ...
+
+@overload
+def _kron(left: DenseArrayT, right: DenseArrayT) -> DenseArrayT: ...
+
+@overload
+def _kron(left: NonCvxOperatorLike, right: SparseLike) -> sp.bsr_array | sp.coo_array: ...
+
+@overload
+def _kron(left: SparseLike, right: NonCvxOperatorLike) -> sp.bsr_array | sp.coo_array: ...
+
+def _kron(left: OperatorLike, right: OperatorLike) -> OperatorLike:
     """
     Compute a Kronecker product while preserving the most expressive type.
 
@@ -27,11 +54,45 @@ def _kron(left, right):
     if isinstance(left, cp.Expression) or isinstance(right, cp.Expression):
         return cp.kron(left, right)
     if sp.issparse(left) or sp.issparse(right):
-        return sp.kron(left, right)
+        if sp.issparse(left):
+            left = _as_sparse_array(left).asformat("coo")
+        if sp.issparse(right):
+            right = _as_sparse_array(right).asformat("coo")
+        return _as_sparse_array(sp.kron(left, right))
     return np.kron(np.asarray(left), np.asarray(right))
 
 
-def tensor(*factors):
+@overload
+def tensor(__first: Expression, *factors: OperatorLike) -> Expression: ...
+
+@overload
+def tensor(__first: OperatorLike, __second: Expression, *factors: OperatorLike) -> Expression: ...
+
+@overload
+def tensor(__first: OperatorLike, __second: OperatorLike, __third: Expression, *factors: OperatorLike) -> Expression: ...
+
+@overload
+def tensor(*factors: NDArray[Any]) -> NDArray[Any]: ...
+
+@overload
+def tensor(*factors: SparseArray) -> sp.bsr_array | sp.coo_array: ...
+
+@overload
+def tensor(
+    __first: SparseLike, *factors: NonCvxOperatorLike
+) -> sp.bsr_array | sp.coo_array: ...
+
+@overload
+def tensor(
+    __first: NonCvxOperatorLike,
+    __second: SparseLike,
+    *factors: NonCvxOperatorLike,
+) -> sp.bsr_array | sp.coo_array: ...
+
+@overload
+def tensor(__first: NonCvxOperatorLike, __second: NonCvxOperatorLike, __third: SparseLike, *factors: NonCvxOperatorLike) -> sp.bsr_array | sp.coo_array: ...
+
+def tensor(*factors: OperatorLike) -> OperatorLike:
     """
     Compute the tensor product of multiple factors from left to right.
 

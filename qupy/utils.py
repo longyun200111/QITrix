@@ -4,7 +4,57 @@ import numpy as np
 import scipy.sparse as sp
 import cvxpy as cp
 
-def _identity_like(dim: int, template):
+from ._types import (
+    NDArray,
+    Expression,
+    OperatorLike,
+    SparseArray,
+    SparseLike,
+)
+
+def _as_sparse_array(op: SparseLike | NDArray[Any]) -> SparseArray:
+    """
+    Convert a sparse matrix or array to a SciPy sparse array.
+
+    Parameters
+    ----------
+    op : SparseLike | NDArray[Any]
+        Dense or sparse matrix-like object to be converted. If the input is
+        already a sparse array, it is returned unchanged.
+
+    Returns
+    -------
+    sp.sparray
+        Sparse array representation of the input operator.
+
+    Raises
+    ------
+    ValueError
+        If the input cannot be converted to a sparse array.
+    """
+    if sp.issparse(op):
+        if isinstance(op, sp.sparray):
+            return op
+        if isinstance(op, sp.csr_matrix):
+            return sp.csr_array(op)
+        if isinstance(op, sp.csc_matrix):
+            return sp.csc_array(op)
+        if isinstance(op, sp.coo_matrix):
+            return sp.coo_array(op)
+        if isinstance(op, sp.bsr_matrix):
+            return sp.bsr_array(op)
+        if isinstance(op, sp.dia_matrix):
+            return sp.dia_array(op)
+        if isinstance(op, sp.dok_matrix):
+            return sp.dok_array(op)
+        if isinstance(op, sp.lil_matrix):
+            return sp.lil_array(op)
+    try:
+        return sp.coo_array(op)
+    except Exception as exc:
+        raise ValueError("input cannot be converted to a sparse array") from exc
+
+def _identity_like(dim: int, template) -> NDArray[Any] | SparseArray:
     """
     Return an identity matrix whose container type matches ``template``.
 
@@ -28,19 +78,19 @@ def _identity_like(dim: int, template):
     if dim < 1:
         raise ValueError("identity dimension must be positive")
 
-    if isinstance(template, cp.Expression):
-        return sp.eye_array(dim)
+    if isinstance(template, Expression):
+        return _as_sparse_array(sp.eye_array(dim))
     if sp.issparse(template):
-        return sp.eye_array(dim)
+        return _as_sparse_array(sp.eye_array(dim))
     return np.eye(dim, dtype=np.result_type(template))
 
-def _shape(op: np.ndarray | cp.Expression | sp.sparray) -> tuple[int, ...]:
+def _shape(op: OperatorLike) -> tuple[int, ...]:
     """
     Return the shape of an operator in a type-checker-friendly way.
 
     Parameters
     ----------
-    op : np.ndarray | cp.Expression | sp.sparray
+    op : OperatorLike
         Matrix-like object whose shape is requested.
 
     Returns
@@ -123,7 +173,7 @@ def _as_csr_array(
     except Exception as exc:
         raise TypeError("expected a matrix-like object") from exc
 
-def trace_product(A, B):
+def trace_product(A: Any, B: Any):
     """
     Compute the trace inner product ``Tr(A @ B)`` for mixed backends.
 

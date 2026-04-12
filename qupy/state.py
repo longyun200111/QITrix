@@ -1,7 +1,37 @@
-import scipy.sparse as sp
-import numpy as np
+from typing import Any, Literal, overload
 
-def fock(dim: int, n: int, format: str = "dense") -> np.ndarray | sp.spmatrix | sp.sparray:
+import scipy.sparse as sp
+
+from ._types import NDArray, SparseArray
+
+@overload
+def fock(dim: int, n: int) -> NDArray[Any]: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["dense"]) -> NDArray[Any]: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["bsr"]) -> sp.bsr_array: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["coo"]) -> sp.coo_array: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["csc"]) -> sp.csc_array: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["csr"]) -> sp.csr_array: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["dia"]) -> sp.dia_array: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["dok"]) -> sp.dok_array: ...
+
+@overload
+def fock(dim: int, n: int, format: Literal["lil"]) -> sp.lil_array: ...
+
+def fock(dim: int, n: int, format: str = "dense") -> NDArray[Any] | SparseArray:
     """
     Return the Fock basis ket ``|n>`` in a finite-dimensional Hilbert space.
 
@@ -17,7 +47,7 @@ def fock(dim: int, n: int, format: str = "dense") -> np.ndarray | sp.spmatrix | 
 
     Returns
     -------
-    np.ndarray | scipy.sparse.spmatrix | sp.sparray
+    np.ndarray | sp.sparray
         Column vector representing ``|n>``. The return type is dense if
         ``format == "dense"``, and sparse otherwise.
     """
@@ -28,7 +58,34 @@ def fock(dim: int, n: int, format: str = "dense") -> np.ndarray | sp.spmatrix | 
         return state.toarray()
     return state.asformat(format)
 
-def fock_dm(dim: int, n: int, format: str = "dense") -> np.ndarray | sp.spmatrix | sp.sparray:
+@overload
+def fock_dm(dim: int, n: int) -> NDArray[Any]: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["dense"]) -> NDArray[Any]: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["bsr"]) -> sp.bsr_array: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["coo"]) -> sp.coo_array: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["csc"]) -> sp.csc_array: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["csr"]) -> sp.csr_array: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["dia"]) -> sp.dia_array: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["dok"]) -> sp.dok_array: ...
+
+@overload
+def fock_dm(dim: int, n: int, format: Literal["lil"]) -> sp.lil_array: ...
+
+def fock_dm(dim: int, n: int, format: str = "dense") -> NDArray[Any] | SparseArray:
     """
     Return the projector ``|n><n|`` in a finite-dimensional Hilbert space.
 
@@ -44,7 +101,7 @@ def fock_dm(dim: int, n: int, format: str = "dense") -> np.ndarray | sp.spmatrix
 
     Returns
     -------
-    np.ndarray | scipy.sparse.spmatrix | sp.sparray
+    np.ndarray | sp.sparray
         Projector ``|n><n|``. The return type is dense if
         ``format == "dense"``, and sparse otherwise.
     """

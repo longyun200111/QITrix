@@ -48,7 +48,7 @@ To pin a branch or tag:
 
 ```bash
 python -m pip install "git+https://github.com/longyun200111/qupy.git@main"
-uv add git+https://github.com/longyun200111/qupy.git --tag v0.1.0
+uv add git+https://github.com/longyun200111/qupy.git --tag v0.2.0
 ```
 
 For local development:
