@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any, overload
 
 import cvxpy as cp
@@ -12,7 +13,7 @@ from .utils import _as_csr_array, _normalize_axes, _as_sparse_array
 
 
 def _ptrans_numpy(
-    rho: NDArray[Any], dims: list[int], axes: int | list[int]
+    rho: NDArray[Any], dims: Sequence[int], axes: int | Sequence[int]
 ) -> NDArray[Any]:
     """
     Compute the partial transpose of a dense matrix with NumPy tensor reshaping.
@@ -22,9 +23,9 @@ def _ptrans_numpy(
     rho : np.ndarray
         Input operator written on the tensor-product space whose subsystem
         dimensions are given by ``dims``.
-    dims : list[int]
+    dims : Sequence[int]
         Dimensions of the subsystems in the same order as the tensor factors.
-    axes : int | list[int]
+    axes : int | Sequence[int]
         Subsystem indices to transpose. Negative indices are allowed and are
         normalized in the usual Python way.
 
@@ -38,6 +39,7 @@ def _ptrans_numpy(
     Writing ``rho`` as a tensor with index structure ``dims + dims``, partial
     transpose on subsystem ``k`` swaps the corresponding bra and ket indices.
     """
+    dims = list(dims)
     normalized_axes = _normalize_axes(axes, len(dims))
     dim = int(np.prod(dims, dtype=int)) if dims else 1
     tensor_rho = np.asarray(rho).reshape(dims + dims)
@@ -49,7 +51,7 @@ def _ptrans_numpy(
 
 
 def _ptrans_cvxpy(
-    rho: Expression, dims: list[int], axes: int | list[int]
+    rho: Expression, dims: Sequence[int], axes: int | Sequence[int]
 ) -> Expression:
     """
     Compute the partial transpose of a CVXPY matrix expression.
@@ -58,9 +60,9 @@ def _ptrans_cvxpy(
     ----------
     rho : cp.Expression
         Matrix-valued CVXPY expression.
-    dims : list[int]
+    dims : Sequence[int]
         Dimensions of the tensor-product subsystems.
-    axes : int | list[int]
+    axes : int | Sequence[int]
         Subsystem indices to transpose. Negative indices are allowed and are
         normalized in the usual Python way.
 
@@ -75,6 +77,7 @@ def _ptrans_cvxpy(
     doubled subsystem indices with ``permute(..., direction="left")``, and
     reshapes the result back to matrix form.
     """
+    dims = list(dims)
     normalized_axes = _normalize_axes(axes, len(dims))
     if not normalized_axes:
         return rho
@@ -95,7 +98,9 @@ def _ptrans_cvxpy(
     return cp.reshape(perm_rho_vec, (dim, dim), order="F")
 
 
-def _ptrans_sum(rho: NDArray[Any] | SparseLike, dims: list[int], axes: int | list[int]) -> SparseArray:
+def _ptrans_sum(
+    rho: NDArray[Any] | SparseLike, dims: Sequence[int], axes: int | Sequence[int]
+) -> SparseArray:
     r"""
     Compute the partial transpose by the defining matrix-summation formula.
 
@@ -104,9 +109,9 @@ def _ptrans_sum(rho: NDArray[Any] | SparseLike, dims: list[int], axes: int | lis
     rho : np.ndarray | scipy.sparse.spmatrix | sp.sparray
         Matrix-like input operator. The function first converts it to
         ``scipy.sparse.csr_array`` and then evaluates the defining summation.
-    dims : list[int]
+    dims : Sequence[int]
         Dimensions of the tensor-product subsystems.
-    axes : int | list[int]
+    axes : int | Sequence[int]
         Subsystem indices to transpose. Negative indices are allowed and are
         normalized in the usual Python way.
 
@@ -130,6 +135,7 @@ def _ptrans_sum(rho: NDArray[Any] | SparseLike, dims: list[int], axes: int | lis
 
     Multiple subsystem transposes are applied successively.
     """
+    dims = list(dims)
     normalized_axes = _normalize_axes(axes, len(dims))
     if not normalized_axes:
         return _as_csr_array(rho)
@@ -160,22 +166,22 @@ def _ptrans_sum(rho: NDArray[Any] | SparseLike, dims: list[int], axes: int | lis
 
 @overload
 def ptrans(
-    rho: Expression, dims: int | list[int] | np.ndarray, axes: int | list[int]
+    rho: Expression, dims: int | Sequence[int] | np.ndarray, axes: int | Sequence[int]
 ) -> Expression: ...
 
 @overload
 def ptrans(
-    rho: NDArray[Any], dims: int | list[int] | np.ndarray, axes: int | list[int]
+    rho: NDArray[Any], dims: int | Sequence[int] | np.ndarray, axes: int | Sequence[int]
 ) -> NDArray[Any]: ...
 
 @overload
 def ptrans(
-    rho: SparseLike, dims: int | list[int] | np.ndarray, axes: int | list[int]
+    rho: SparseLike, dims: int | Sequence[int] | np.ndarray, axes: int | Sequence[int]
 ) -> SparseArray: ...
 
 
 def ptrans(
-    rho: OperatorLike, dims: int | list[int] | np.ndarray, axes: int | list[int]
+    rho: OperatorLike, dims: int | Sequence[int] | np.ndarray, axes: int | Sequence[int]
 ) -> OperatorLike:
     """
     Compute the partial transpose of an operator over selected subsystems.
@@ -186,10 +192,10 @@ def ptrans(
         Input operator. Dense NumPy arrays and CVXPY matrix expressions have
         dedicated implementations. Any other supported matrix-like input is
         handled by the fallback summation-based branch.
-    dims : int | list[int] | np.ndarray
+    dims : int | Sequence[int] | np.ndarray
         Subsystem dimensions. The total Hilbert-space dimension must satisfy
         ``np.prod(dims) == rho.shape[0] == rho.shape[1]``.
-    axes : int | list[int]
+    axes : int | Sequence[int]
         Subsystem indices to transpose. Negative indices are allowed and are
         normalized in the usual Python way.
 
