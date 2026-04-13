@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 import cvxpy as cp
 import numpy as np
 import pytest
@@ -10,10 +12,12 @@ from tests.helpers import assert_allclose, random_matrix
 
 def ref_permute(
     rho: np.ndarray,
-    dims: list[int],
-    perm: list[int],
+    dims: Sequence[int],
+    perm: Sequence[int],
     direction: str = "both",
 ) -> np.ndarray:
+    dims = list(dims)
+    perm = list(perm)
     dim = int(np.prod(dims, dtype=int)) if dims else 1
     if direction == "both":
         tensor_rho = rho.reshape(dims + dims)

@@ -1,3 +1,5 @@
+from collections.abc import Sequence
+
 import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
@@ -13,7 +15,8 @@ from qupy.utils import _normalize_axes
 from tests.helpers import assert_allclose, random_matrix
 
 
-def ref_ptrace(rho: np.ndarray, dims: list[int], axes: int | list[int]) -> np.ndarray:
+def ref_ptrace(rho: np.ndarray, dims: Sequence[int], axes: int | Sequence[int]) -> np.ndarray:
+    dims = list(dims)
     normalized_axes = _normalize_axes(axes, len(dims))
     tensor_rho = rho.reshape(dims + dims)
     current_dims = dims.copy()

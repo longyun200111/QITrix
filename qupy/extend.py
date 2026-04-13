@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any, overload
 
 import numpy as np
@@ -8,13 +9,13 @@ from ._types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
 from .utils import _normalize_axes, _shape, _identity_like, _as_sparse_array
 
 
-def _inverse_axis_order(axis_order: list[int]) -> list[int]:
+def _inverse_axis_order(axis_order: Sequence[int]) -> list[int]:
     """
     Compute the inverse permutation that restores canonical subsystem order.
 
     Parameters
     ----------
-    axis_order : list[int]
+    axis_order : Sequence[int]
         Current ordering of subsystem labels.
 
     Returns
@@ -32,47 +33,47 @@ def _inverse_axis_order(axis_order: list[int]) -> list[int]:
 @overload
 def extend(
     op: Expression,
-    dims: list[int] | None = None,
-    axes: int | list[int] | None = None,
-    input_dims: list[int] | None = None,
-    output_dims: list[int] | None = None,
-    input_axes: int | list[int] | None = None,
-    output_axes: int | list[int] | None = None,
+    dims: Sequence[int] | None = None,
+    axes: int | Sequence[int] | None = None,
+    input_dims: Sequence[int] | None = None,
+    output_dims: Sequence[int] | None = None,
+    input_axes: int | Sequence[int] | None = None,
+    output_axes: int | Sequence[int] | None = None,
 ) -> Expression: ...
 
 
 @overload
 def extend(
     op: SparseLike,
-    dims: list[int] | None = None,
-    axes: int | list[int] | None = None,
-    input_dims: list[int] | None = None,
-    output_dims: list[int] | None = None,
-    input_axes: int | list[int] | None = None,
-    output_axes: int | list[int] | None = None,
+    dims: Sequence[int] | None = None,
+    axes: int | Sequence[int] | None = None,
+    input_dims: Sequence[int] | None = None,
+    output_dims: Sequence[int] | None = None,
+    input_axes: int | Sequence[int] | None = None,
+    output_axes: int | Sequence[int] | None = None,
 ) -> SparseArray: ...
 
 
 @overload
 def extend(
     op: NDArray[Any],
-    dims: list[int] | None = None,
-    axes: int | list[int] | None = None,
-    input_dims: list[int] | None = None,
-    output_dims: list[int] | None = None,
-    input_axes: int | list[int] | None = None,
-    output_axes: int | list[int] | None = None,
+    dims: Sequence[int] | None = None,
+    axes: int | Sequence[int] | None = None,
+    input_dims: Sequence[int] | None = None,
+    output_dims: Sequence[int] | None = None,
+    input_axes: int | Sequence[int] | None = None,
+    output_axes: int | Sequence[int] | None = None,
 ) -> NDArray[Any]: ...
 
 
 def extend(
     op: OperatorLike,
-    dims: list[int] | None = None,
-    axes: list[int] | int | None = None,
-    input_dims: list[int] | None = None,
-    output_dims: list[int] | None = None,
-    input_axes: list[int] | int | None = None,
-    output_axes: list[int] | int | None = None,
+    dims: Sequence[int] | None = None,
+    axes: Sequence[int] | int | None = None,
+    input_dims: Sequence[int] | None = None,
+    output_dims: Sequence[int] | None = None,
+    input_axes: Sequence[int] | int | None = None,
+    output_axes: Sequence[int] | int | None = None,
 ) -> OperatorLike:
     """
     Extend an operator to a larger multipartite system.
@@ -81,15 +82,15 @@ def extend(
     ----------
     op : np.ndarray | scipy.sparse.spmatrix | sp.sparray | cvxpy.Expression
         Operator acting on a subsystem selection.
-    dims : list[int] | None, optional
+    dims : Sequence[int] | None, optional
         Common input/output subsystem dimensions. This is a shorthand for
         setting both ``input_dims`` and ``output_dims``.
-    axes : int | list[int] | None, optional
+    axes : int | Sequence[int] | None, optional
         Common input/output subsystem indices. This is a shorthand for setting
         both ``input_axes`` and ``output_axes``.
-    input_dims, output_dims : list[int] | None, optional
+    input_dims, output_dims : Sequence[int] | None, optional
         Input and output subsystem dimensions for a rectangular operator.
-    input_axes, output_axes : int | list[int] | None, optional
+    input_axes, output_axes : int | Sequence[int] | None, optional
         Positions of the subsystems on which ``op`` acts in the input and
         output spaces, respectively.
 

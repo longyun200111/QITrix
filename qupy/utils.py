@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any
 
 import numpy as np
@@ -103,14 +104,14 @@ def _shape(op: OperatorLike) -> tuple[int, ...]:
         shape = np.asarray(op).shape
     return tuple(int(dim) for dim in shape)
 
-def _normalize_axes(axes: int | list[int], ndim: int) -> list[int]:
+def _normalize_axes(axes: int | Sequence[int], ndim: int) -> list[int]:
     """
     Normalize subsystem indices to a validated list of non-negative axes.
 
     Parameters
     ----------
-    axes : int | list[int]
-        Single axis or list of axes.
+    axes : int | Sequence[int]
+        Single axis or sequence of axes.
     ndim : int
         Number of available subsystems.
 

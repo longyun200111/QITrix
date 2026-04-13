@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from typing import Any, Literal, overload
 
 import numpy as np
@@ -8,8 +9,8 @@ from .utils import _as_sparse_array
 
 def _permute_numpy(
     rho: NDArray[Any],
-    dims: list[int],
-    perm: list[int],
+    dims: Sequence[int],
+    perm: Sequence[int],
     direction: Literal["both", "left", "right"] = "both",
 ) -> NDArray[Any]:
     """
@@ -20,9 +21,9 @@ def _permute_numpy(
     rho : NDArray[Any]
         Input operator written on the tensor-product space whose subsystem
         dimensions are given by ``dims``.
-    dims : list[int]
+    dims : Sequence[int]
         Dimensions of the subsystems in the same order as the tensor factors.
-    perm : list[int]
+    perm : Sequence[int]
         Permutation of subsystem indices. The indices are assumed to be already
         normalized to the range ``0, ..., len(dims) - 1``.
     direction : Literal["both", "left", "right"], optional
@@ -39,6 +40,8 @@ def _permute_numpy(
     The function reshapes ``rho`` into a tensor and applies ``np.transpose``
     to the subsystem indices selected by ``direction``.
     """
+    dims = list(dims)
+    perm = list(perm)
     dim = int(np.prod(dims, dtype=int)) if dims else 1
     if direction == "both":
         tensor_rho = np.asarray(rho).reshape(dims + dims)
@@ -60,15 +63,15 @@ def _permute_numpy(
 
     return perm_rho
 
-def _get_permutation_matrix(dims: list[int], perm: list[int]) -> sp.csr_array:
+def _get_permutation_matrix(dims: Sequence[int], perm: Sequence[int]) -> sp.csr_array:
     """
     Construct the subsystem permutation matrix associated with ``perm``.
 
     Parameters
     ----------
-    dims : list[int]
+    dims : Sequence[int]
         Dimensions of the subsystems.
-    perm : list[int]
+    perm : Sequence[int]
         Target ordering of subsystem indices.
 
     Returns
@@ -86,8 +89,8 @@ def _get_permutation_matrix(dims: list[int], perm: list[int]) -> sp.csr_array:
 @overload
 def permute(
     rho: Expression,
-    dims: list[int],
-    perm: list[int],
+    dims: Sequence[int],
+    perm: Sequence[int],
     direction: Literal["both", "left", "right"] = "both",
 ) -> Expression: ...
 
@@ -95,8 +98,8 @@ def permute(
 @overload
 def permute(
     rho: SparseLike,
-    dims: list[int],
-    perm: list[int],
+    dims: Sequence[int],
+    perm: Sequence[int],
     direction: Literal["both", "left", "right"] = "both",
 ) -> SparseArray: ...
 
@@ -104,16 +107,16 @@ def permute(
 @overload
 def permute(
     rho: NDArray[Any],
-    dims: list[int],
-    perm: list[int],
+    dims: Sequence[int],
+    perm: Sequence[int],
     direction: Literal["both", "left", "right"] = "both",
 ) -> NDArray[Any]: ...
 
 
 def permute(
     rho: OperatorLike,
-    dims: list[int],
-    perm: list[int],
+    dims: Sequence[int],
+    perm: Sequence[int],
     direction: Literal["both", "left", "right"] = "both",
 ) -> OperatorLike:
     """
@@ -123,9 +126,9 @@ def permute(
     ----------
     rho : np.ndarray | scipy.sparse.spmatrix | sp.sparray | cvxpy.Expression
         Matrix-like input object.
-    dims : list[int]
+    dims : Sequence[int]
         Dimensions of the subsystems being permuted.
-    perm : list[int]
+    perm : Sequence[int]
         Target subsystem ordering.
     direction : Literal["both", "left", "right"], optional
         Which side of the matrix should be permuted. Supported values are
