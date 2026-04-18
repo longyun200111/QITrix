@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-from qupy import permute
-from qupy.permute import _get_permutation_matrix, _permute_numpy
+from QITrix import permute
+from QITrix.ops.permute import _get_permutation_matrix, _permute_numpy
 from tests.helpers import assert_allclose, random_matrix
 
 
@@ -66,3 +66,37 @@ def test_permute_public_all_supported_types(direction: str) -> None:
     assert isinstance(expr, cp.Expression)
     assert expr.value is not None
     assert_allclose(expr.value, expected)
+
+
+@pytest.mark.parametrize(
+    ("dims", "perm", "match"),
+    [
+        ([2, 2], [0, 0], "perm must be a permutation"),
+        ([2, 2], [0], "perm must be a permutation"),
+        ([2, 0], [1, 0], "dims must contain only positive integers"),
+    ],
+)
+def test_permute_rejects_invalid_dims_and_permutations(
+    dims: list[int], perm: list[int], match: str
+) -> None:
+    rho = np.eye(4)
+    with pytest.raises(ValueError, match=match):
+        permute(rho, dims, perm)
+
+
+def test_permute_rejects_shape_mismatch() -> None:
+    rho = np.eye(4)
+    with pytest.raises(ValueError, match="expected shape \\(6, 6\\)"):
+        permute(rho, [2, 3], [1, 0])
+
+
+def test_permute_then_inverse_recovers_operator() -> None:
+    dims = [2, 3, 2]
+    perm = [2, 0, 1]
+    inverse_perm = [1, 2, 0]
+    rho = random_matrix((12, 12), seed=204, complex_=True)
+
+    permuted = permute(rho, dims, perm)
+    recovered = permute(permuted, [dims[i] for i in perm], inverse_perm)
+
+    assert_allclose(recovered, rho)

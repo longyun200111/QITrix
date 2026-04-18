@@ -2,17 +2,18 @@ from collections.abc import Sequence
 
 import cvxpy as cp
 import numpy as np
+import pytest
 import scipy.sparse as sp
 
-from qupy import ptrans
-from qupy.ptrans import _ptrans_cvxpy, _ptrans_numpy, _ptrans_sum
-from qupy.utils import _normalize_axes
+from QITrix import ptrans
+from QITrix.ops.ptrans import _ptrans_cvxpy, _ptrans_numpy, _ptrans_sum
+from QITrix._internal.utils import normalize_axes
 from tests.helpers import assert_allclose, random_matrix
 
 
 def ref_ptrans(rho: np.ndarray, dims: Sequence[int], axes: int | Sequence[int]) -> np.ndarray:
     dims = list(dims)
-    normalized_axes = _normalize_axes(axes, len(dims))
+    normalized_axes = normalize_axes(axes, len(dims))
     tensor_rho = rho.reshape(dims + dims)
     perm = list(range(2 * len(dims)))
     for axis in normalized_axes:
@@ -50,3 +51,21 @@ def test_ptrans_public_dense_sparse_and_cvxpy() -> None:
     expr = ptrans(cp.Constant(rho), [2, 2], 1)
     assert expr.value is not None
     assert_allclose(expr.value, expected)
+
+
+def test_ptrans_rejects_dimension_mismatch() -> None:
+    rho = np.eye(4)
+    with pytest.raises(ValueError, match="expected a square matrix of shape \\(6, 6\\)"):
+        ptrans(rho, [2, 3], 0)
+
+
+def test_ptrans_rejects_nonsquare_input() -> None:
+    rho = np.ones((4, 2))
+    with pytest.raises(ValueError, match="expected a square matrix"):
+        ptrans(rho, [2, 2], 0)
+
+
+def test_ptrans_is_an_involution() -> None:
+    rho = random_matrix((12, 12), seed=405, complex_=True)
+    twice_transposed = ptrans(ptrans(rho, [2, 2, 3], axes=[0, 2]), [2, 2, 3], axes=[0, 2])
+    assert_allclose(twice_transposed, rho)

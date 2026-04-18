@@ -2,22 +2,23 @@ from collections.abc import Sequence
 
 import cvxpy as cp
 import numpy as np
+import pytest
 import scipy.sparse as sp
 
-from qupy import ptrace
-from qupy.ptrace import (
+from QITrix import ptrace
+from QITrix.ops.ptrace import (
     _partial_trace_superop,
     _ptrace_cvxpy,
     _ptrace_numpy,
     _ptrace_sum,
 )
-from qupy.utils import _normalize_axes
+from QITrix._internal.utils import normalize_axes
 from tests.helpers import assert_allclose, random_matrix
 
 
 def ref_ptrace(rho: np.ndarray, dims: Sequence[int], axes: int | Sequence[int]) -> np.ndarray:
     dims = list(dims)
-    normalized_axes = _normalize_axes(axes, len(dims))
+    normalized_axes = normalize_axes(axes, len(dims))
     tensor_rho = rho.reshape(dims + dims)
     current_dims = dims.copy()
 
@@ -71,3 +72,21 @@ def test_ptrace_public_dense_sparse_and_cvxpy() -> None:
     expr = ptrace(cp.Constant(rho), [2, 2], 1)
     assert expr.value is not None
     assert_allclose(expr.value, expected)
+
+
+def test_ptrace_rejects_dimension_mismatch() -> None:
+    rho = np.eye(4)
+    with pytest.raises(ValueError, match="expected a square matrix of shape \\(6, 6\\)"):
+        ptrace(rho, [2, 3], 0)
+
+
+def test_ptrace_rejects_nonsquare_input() -> None:
+    rho = np.ones((4, 2))
+    with pytest.raises(ValueError, match="expected a square matrix"):
+        ptrace(rho, [2, 2], 0)
+
+
+def test_ptrace_preserves_trace() -> None:
+    rho = random_matrix((12, 12), seed=306, complex_=True)
+    reduced = ptrace(rho, [2, 2, 3], axes=[0, 2])
+    assert np.isclose(np.trace(reduced), np.trace(rho))

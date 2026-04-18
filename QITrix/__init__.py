@@ -6,15 +6,15 @@ partial transpose, and basic Fock-state constructors.
 """
 
 from ._version import __version__
-from .extend import extend
-from .permute import permute
-from .ptrace import ptrace
-from .ptrans import ptrans
-from .state import fock, fock_dm
-from .tensor import tensor
+from .core import Operator, Space, SpaceList, operator
+from .ops import extend, fock, fock_dm, permute, ptrace, ptrans, tensor
 
 __all__ = [
     "__version__",
+    "Operator",
+    "operator",
+    "Space",
+    "SpaceList",
     "extend",
     "permute",
     "ptrace",

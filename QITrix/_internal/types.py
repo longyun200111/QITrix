@@ -1,13 +1,11 @@
 """
-Shared typing declarations for the ``qupy`` package.
-
-This module centralizes the type aliases and type variables used across the
-public linear-algebra helpers.
+Shared typing declarations for the ``QITrix`` package.
 """
 
 from typing import Any, TypeVar
-from numpy.typing import NDArray
+
 from cvxpy import Expression
+from numpy.typing import NDArray
 
 import scipy.sparse as sp
 
@@ -37,18 +35,3 @@ DenseArrayT = TypeVar("DenseArrayT", bound=NDArray[Any])
 SparseArrayT = TypeVar("SparseArrayT", bound=SparseArray)
 CvxArrayT = TypeVar("CvxArrayT", bound=Expression)
 OperatorLikeT = TypeVar("OperatorLikeT", bound=OperatorLike)
-
-
-__all__ = [
-    "NDArray",
-    "SparseArray",
-    "SparseMatrix",
-    "SparseLike",
-    "Expression",
-    "NonCvxOperatorLike",
-    "OperatorLike",
-    "DenseArrayT",
-    "SparseArrayT",
-    "CvxArrayT",
-    "OperatorLikeT",
-]
