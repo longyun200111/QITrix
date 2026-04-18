@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from QITrix._internal.utils import shape_of
+from qitrix._internal.utils import shape_of
 
 from .space import Space, SpaceList, as_space_list, normalize_labels
 
@@ -73,7 +73,7 @@ class Operator:
         return self.with_spaces(input_space=input_space, output_space=output_space)
 
     def tensor(self, other: Operator) -> Operator:
-        from QITrix.ops.tensor import tensor
+        from qitrix.ops.tensor import tensor
 
         return Operator(
             tensor(self.data, other.data),
@@ -82,17 +82,17 @@ class Operator:
         )
 
     def ptrace(self, labels: str | Sequence[str]) -> Operator:
-        from QITrix.ops.ptrace import ptrace
+        from qitrix.ops.ptrace import ptrace
 
         return ptrace(self, labels)
 
     def ptrans(self, labels: str | Sequence[str]) -> Operator:
-        from QITrix.ops.ptrans import ptrans
+        from qitrix.ops.ptrans import ptrans
 
         return ptrans(self, labels)
 
     def permute(self, labels: Sequence[str], direction: str = "both") -> Operator:
-        from QITrix.ops.permute import permute
+        from qitrix.ops.permute import permute
 
         return permute(self, labels, direction=direction)
 
@@ -106,7 +106,7 @@ class Operator:
         input_labels: str | Sequence[str] | None = None,
         output_labels: str | Sequence[str] | None = None,
     ) -> Operator:
-        from QITrix.ops.extend import extend
+        from qitrix.ops.extend import extend
 
         if space is not None:
             if input_space is not None or output_space is not None:

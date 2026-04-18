@@ -2,9 +2,9 @@ from typing import Any, overload
 
 import scipy.sparse as sp
 
-from QITrix.backend import resolve_backend
-from QITrix.backend.adapters import to_sparse_array
-from QITrix._internal.types import (
+from qitrix.backend import resolve_backend
+from qitrix.backend.adapters import to_sparse_array
+from qitrix._internal.types import (
     DenseArrayT,
     Expression,
     NDArray,

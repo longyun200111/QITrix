@@ -5,14 +5,14 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-from QITrix import ptrace
-from QITrix.ops.ptrace import (
+from qitrix import ptrace
+from qitrix.ops.ptrace import (
     _partial_trace_superop,
     _ptrace_cvxpy,
     _ptrace_numpy,
     _ptrace_sum,
 )
-from QITrix._internal.utils import normalize_axes
+from qitrix._internal.utils import normalize_axes
 from tests.helpers import assert_allclose, random_matrix
 
 

@@ -5,8 +5,8 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-from QITrix import permute
-from QITrix.ops.permute import _get_permutation_matrix, _permute_numpy
+from qitrix import permute
+from qitrix.ops.permute import _get_permutation_matrix, _permute_numpy
 from tests.helpers import assert_allclose, random_matrix
 
 

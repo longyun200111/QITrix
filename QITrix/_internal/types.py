@@ -1,5 +1,5 @@
 """
-Shared typing declarations for the ``QITrix`` package.
+Shared typing declarations for the ``qitrix`` package.
 """
 
 from typing import Any, TypeVar

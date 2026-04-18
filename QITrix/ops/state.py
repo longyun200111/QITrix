@@ -2,7 +2,7 @@ from typing import Any, Literal, overload
 
 import scipy.sparse as sp
 
-from QITrix._internal.types import NDArray, SparseArray
+from qitrix._internal.types import NDArray, SparseArray
 
 
 @overload

@@ -4,8 +4,8 @@ from typing import Any, overload
 import numpy as np
 import scipy.sparse as sp
 
-from QITrix._internal.types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
-from QITrix._internal.utils import as_sparse_array, identity_like, normalize_axes, shape_of
+from qitrix._internal.types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
+from qitrix._internal.utils import as_sparse_array, identity_like, normalize_axes, shape_of
 
 from .permute import permute
 from .tensor import tensor

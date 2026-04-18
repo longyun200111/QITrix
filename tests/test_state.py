@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-from QITrix import fock, fock_dm
+from qitrix import fock, fock_dm
 from tests.helpers import assert_allclose
 
 

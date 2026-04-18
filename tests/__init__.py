@@ -1,1 +1,1 @@
-"""Test package for QITrix."""
+"""Test package for qitrix."""

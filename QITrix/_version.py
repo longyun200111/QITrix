@@ -1,3 +1,3 @@
-"""Package version information for ``QITrix``."""
+"""Package version information for ``qitrix``."""
 
 __version__ = "0.2.0"

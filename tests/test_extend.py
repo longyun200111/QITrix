@@ -2,8 +2,8 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
-from QITrix import extend
-from QITrix.ops.extend import _inverse_axis_order
+from qitrix import extend
+from qitrix.ops.extend import _inverse_axis_order
 from tests.helpers import assert_allclose, random_matrix
 
 

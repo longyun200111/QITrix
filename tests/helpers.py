@@ -1,7 +1,6 @@
 import numpy as np
 import scipy.sparse as sp
 
-
 ATOL = 1e-10
 
 

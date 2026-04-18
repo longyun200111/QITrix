@@ -2,8 +2,8 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
-from QITrix import tensor
-from QITrix.ops.tensor import _kron
+from qitrix import tensor
+from qitrix.ops.tensor import _kron
 from tests.helpers import assert_allclose, random_matrix
 
 

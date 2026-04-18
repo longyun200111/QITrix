@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-from QITrix._internal.utils import (
+from qitrix._internal.utils import (
     as_csr_array,
     as_sparse_array,
     identity_like,

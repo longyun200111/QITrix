@@ -14,5 +14,10 @@ dependencies = [
     "scipy>=1.17.1",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
 [tool.setuptools.packages.find]
-include = ["QITrix*"]
+include = ["qitrix*"]

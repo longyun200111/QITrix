@@ -5,8 +5,8 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
-from QITrix.backend import resolve_backend
-from QITrix.backend.adapters import to_sparse_array
+from qitrix.backend import resolve_backend
+from qitrix.backend.adapters import to_sparse_array
 
 from .types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
 

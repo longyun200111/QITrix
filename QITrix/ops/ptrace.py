@@ -5,16 +5,16 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
-from QITrix.backend import resolve_backend
-from QITrix._internal.types import Expression, NDArray, SparseArray, SparseLike
-from QITrix._internal.utils import (
+from qitrix.backend import resolve_backend
+from qitrix._internal.types import Expression, NDArray, SparseArray, SparseLike
+from qitrix._internal.utils import (
     as_csr_array,
     as_sparse_array,
     normalize_axes,
     normalize_dims,
     validate_square_shape,
 )
-from QITrix.core.operator import Operator
+from qitrix.core.operator import Operator
 
 from .extend import extend
 from .state import fock

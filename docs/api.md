@@ -4,10 +4,10 @@
 primitives built on top of NumPy, SciPy sparse arrays, and selected CVXPY
 expressions.
 
-The public API is exported from `QITrix.__init__`:
+The public API is exported from `qitrix.__init__`:
 
 ```python
-from QITrix import (
+from qitrix import (
     __version__,
     Operator,
     Space,
@@ -34,7 +34,7 @@ uv sync
 To run the test suite:
 
 ```bash
-uv run pytest
+uv run --group dev python -m pytest
 ```
 
 ## Backend Support
@@ -78,7 +78,7 @@ Represent a single tensor factor.
 ### Example
 
 ```python
-from QITrix import Space
+from qitrix import Space
 
 a = Space("A", 2)
 ```
@@ -112,7 +112,7 @@ Represent an ordered tensor-product space built from `Space` factors.
 ### Example
 
 ```python
-from QITrix import Space, SpaceList
+from qitrix import Space, SpaceList
 
 space = SpaceList([Space("A", 2), Space("B", 3), Space("C", 2)])
 ac = space.select(["A", "C"])
@@ -146,7 +146,7 @@ Attach input/output `Space` metadata to a matrix-like object.
 
 ```python
 import numpy as np
-from QITrix import Operator, Space, SpaceList
+from qitrix import Operator, Space, SpaceList
 
 rho = Operator(
     np.eye(6, dtype=complex) / 6,
@@ -197,7 +197,7 @@ Compute the tensor (Kronecker) product of multiple factors from left to right.
 
 ```python
 import numpy as np
-from QITrix import tensor
+from qitrix import tensor
 
 sigma_x = np.array([[0, 1], [1, 0]], dtype=complex)
 sigma_z = np.array([[1, 0], [0, -1]], dtype=complex)
@@ -244,7 +244,7 @@ Permute subsystem order in an operator or rectangular matrix.
 
 ```python
 import numpy as np
-from QITrix import permute
+from qitrix import permute
 
 rho = np.arange(16).reshape(4, 4)
 rho_swapped = permute(rho, dims=[2, 2], perm=[1, 0])
@@ -253,7 +253,7 @@ rho_swapped = permute(rho, dims=[2, 2], perm=[1, 0])
 For `Operator` inputs, use subsystem labels instead of integer permutations:
 
 ```python
-from QITrix import Operator, Space, SpaceList, permute
+from qitrix import Operator, Space, SpaceList, permute
 
 op = Operator(np.eye(6), space=SpaceList([Space("A", 2), Space("B", 3)]))
 swapped = permute(op, ["B", "A"])
@@ -302,7 +302,7 @@ space.
 
 ```python
 import numpy as np
-from QITrix import extend
+from qitrix import extend
 
 sigma_x = np.array([[0, 1], [1, 0]], dtype=complex)
 
@@ -314,7 +314,7 @@ Rectangular operators are also supported:
 
 ```python
 import numpy as np
-from QITrix import extend
+from qitrix import extend
 
 isometry = np.array([[1.0, 0.0]], dtype=complex)
 full_isometry = extend(
@@ -357,7 +357,7 @@ Compute the partial trace over selected subsystems.
 
 ```python
 import numpy as np
-from QITrix import ptrace, tensor
+from qitrix import ptrace, tensor
 
 rho_a = np.array([[1, 0], [0, 0]], dtype=complex)
 rho_b = np.eye(3, dtype=complex) / 3
@@ -369,7 +369,7 @@ reduced_a = ptrace(rho_ab, dims=[2, 3], axes=[1])
 With named spaces:
 
 ```python
-from QITrix import Operator, Space, SpaceList, ptrace
+from qitrix import Operator, Space, SpaceList, ptrace
 
 rho_ab = Operator(rho_ab, space=SpaceList([Space("A", 2), Space("B", 3)]))
 reduced_a = ptrace(rho_ab, "B")
@@ -416,7 +416,7 @@ Compute the partial transpose over selected subsystems.
 
 ```python
 import numpy as np
-from QITrix import ptrans
+from qitrix import ptrans
 
 rho = np.eye(6, dtype=complex) / 6
 rho_pt = ptrans(rho, dims=[2, 3], axes=[1])
@@ -458,7 +458,7 @@ Return the Fock basis ket `|n>` in a finite-dimensional Hilbert space.
 ### Example
 
 ```python
-from QITrix import fock
+from qitrix import fock
 
 ket_1_dense = fock(4, 1)
 ket_1 = fock(4, 1, format="csr")
@@ -490,7 +490,7 @@ Return the rank-one projector `|n><n|`.
 ### Example
 
 ```python
-from QITrix import fock_dm
+from qitrix import fock_dm
 
 rho_1_dense = fock_dm(4, 1)
 rho_1 = fock_dm(4, 1, format="csr")
@@ -499,7 +499,7 @@ rho_1 = fock_dm(4, 1, format="csr")
 ## Version
 
 ```python
-from QITrix import __version__
+from qitrix import __version__
 ```
 
 Package version string.

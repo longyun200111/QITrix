@@ -4,10 +4,10 @@ from typing import Any, Literal, overload
 import numpy as np
 import scipy.sparse as sp
 
-from QITrix.backend import resolve_backend
-from QITrix._internal.types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
-from QITrix._internal.utils import as_sparse_array, normalize_dims, normalize_perm, shape_of
-from QITrix.core.operator import Operator
+from qitrix.backend import resolve_backend
+from qitrix._internal.types import Expression, NDArray, OperatorLike, SparseArray, SparseLike
+from qitrix._internal.utils import as_sparse_array, normalize_dims, normalize_perm, shape_of
+from qitrix.core.operator import Operator
 
 
 def _permute_numpy(

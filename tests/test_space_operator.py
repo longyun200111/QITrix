@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-from QITrix import Operator, Space, SpaceList, operator, permute, ptrace, ptrans, tensor
+from qitrix import Operator, Space, SpaceList, operator, permute, ptrace, ptrans, tensor
 from tests.helpers import assert_allclose, random_matrix
 
 

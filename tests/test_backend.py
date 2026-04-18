@@ -2,9 +2,9 @@ import cvxpy as cp
 import numpy as np
 import scipy.sparse as sp
 
-from QITrix.backend import backend_registry, resolve_backend
-from QITrix.ops.extend import extend
-from QITrix.ops.tensor import tensor
+from qitrix.backend import backend_registry, resolve_backend
+from qitrix.ops.extend import extend
+from qitrix.ops.tensor import tensor
 from tests.helpers import assert_allclose, random_matrix
 
 

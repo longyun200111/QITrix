@@ -56,7 +56,7 @@ Partial trace and partial transpose:
 
 ```python
 import numpy as np
-from QITrix import ptrace, ptrans
+from qitrix import ptrace, ptrans
 
 rho = np.eye(6, dtype=complex) / 6
 
@@ -68,7 +68,7 @@ Operator extension:
 
 ```python
 import numpy as np
-from QITrix import extend
+from qitrix import extend
 
 sigma_x = np.array([[0, 1], [1, 0]], dtype=complex)
 
@@ -79,7 +79,7 @@ full_x = extend(sigma_x, dims=[2, 2, 2], axes=[1])
 Sparse Fock states:
 
 ```python
-from QITrix import fock, fock_dm
+from qitrix import fock, fock_dm
 
 ket_2 = fock(5, 2, format="csr")
 proj_2 = fock_dm(5, 2, format="csr")
@@ -89,7 +89,7 @@ Named subsystem spaces:
 
 ```python
 import numpy as np
-from QITrix import Operator, Space, SpaceList, ptrace
+from qitrix import Operator, Space, SpaceList, ptrace
 
 space = SpaceList([Space("A", 2), Space("B", 3)])
 rho = Operator(np.eye(6, dtype=complex) / 6, space=space)
@@ -136,7 +136,13 @@ cd QITrix
 uv sync
 ```
 
-The import/package name is `QITrix`.
+To run the test suite:
+
+```bash
+uv run --group dev python -m pytest
+```
+
+The project name is `QITrix`. The Python import name is `qitrix`.
 
 ## Documentation
 

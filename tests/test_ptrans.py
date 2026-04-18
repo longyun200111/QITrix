@@ -5,9 +5,9 @@ import numpy as np
 import pytest
 import scipy.sparse as sp
 
-from QITrix import ptrans
-from QITrix.ops.ptrans import _ptrans_cvxpy, _ptrans_numpy, _ptrans_sum
-from QITrix._internal.utils import normalize_axes
+from qitrix import ptrans
+from qitrix.ops.ptrans import _ptrans_cvxpy, _ptrans_numpy, _ptrans_sum
+from qitrix._internal.utils import normalize_axes
 from tests.helpers import assert_allclose, random_matrix
 
 
